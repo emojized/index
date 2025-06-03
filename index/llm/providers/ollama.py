@@ -1,11 +1,6 @@
 import aiohttp
 from typing import Any, List, Union, Dict
 
-# These may already exist elsewhere in your project
-class TextContent:
-    def __init__(self, text: str):
-        self.text = text
-
 class Message:
     def __init__(self, role: str, content: Any):
         self.role = role
@@ -14,33 +9,19 @@ class Message:
 class OllamaProvider:
     def __init__(
         self,
-        model: str = "qwen2.5",
-        enable_thinking: bool = False,
-        thinking_token_budget: int = 2048
+        model: str = "llama3.2"
     ):
         self.model = model
-        self.enable_thinking = enable_thinking
-        self.thinking_token_budget = thinking_token_budget
         self.base_url = "http://localhost:11434/api"
 
     async def call(self, messages: Union[List[Message], str]) -> Dict[str, Any]:
-        """
-        Accepts raw strings or list of Message objects.
-        Returns fake response for demo/testing.
-        """
-
         full_prompt = ""
 
-        # Case 1: Raw string prompt
         if isinstance(messages, str):
             full_prompt = messages.strip()
-        
-        # Case 2: List of Message objects
         elif isinstance(messages, list):
             for msg in messages:
-                if isinstance(msg, dict) and "type" in msg:
-                    continue  # Skip stream control messages
-                elif isinstance(msg, Message) and msg.role == "user":
+                if isinstance(msg, Message) and msg.role == "user":
                     full_prompt = self._extract_content(msg.content)
                     break
                 elif isinstance(msg, dict):
@@ -61,11 +42,7 @@ class OllamaProvider:
         }
 
     def _extract_content(self, content: Any) -> str:
-        if isinstance(content, TextContent):
-            return content.text
-        elif isinstance(content, list):
-            return " ".join([self._extract_content(item) for item in content])
-        elif hasattr(content, "text"):
+        if hasattr(content, "text"):
             return content.text
         elif isinstance(content, dict) and "text" in content:
             return content["text"]
