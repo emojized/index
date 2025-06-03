@@ -1,3 +1,5 @@
+# Import compatibility patch first
+from index.compat import *
 from index.agent.agent import Agent
 from index.agent.models import ActionModel, ActionResult, AgentOutput
 from index.browser.browser import Browser, BrowserConfig
