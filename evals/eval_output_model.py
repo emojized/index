@@ -20,7 +20,7 @@ async def run_agent(data: Dict[str, Any]):
     output_model = data.get("output_model")
     start_url = data.get("start_url")
     
-    llm = OllamaProvider(model="qwen2.5")
+    llm = OllamaProvider(model="llama3.2")
     
     agent = Agent(llm=llm)
     output = await agent.run(

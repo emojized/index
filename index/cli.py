@@ -635,7 +635,7 @@ def select_model_and_check_key():
         required_key = "OPENAI_API_KEY"
     elif choice == "5":
         provider = "ollama"
-        model = "qwen2.5"
+        model = "llama3.2"
         required_key = "OLLAMA_API_KEY"
     else:
         raise ValueError(f"Invalid choice: {choice}")

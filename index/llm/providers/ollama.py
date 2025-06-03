@@ -1,22 +1,20 @@
 import aiohttp
 from typing import Any, List, Union, Dict
 
-# These classes may already exist elsewhere in your project
 class TextContent:
     def __init__(self, text: str):
         self.text = text
 
 class Message:
-    def __init__(self, role: str, content: Any, name: str | None = None):
+    def __init__(self, role: str, content: Any):
         self.role = role
         self.content = content
-        self.name = name
 
     def to_dict(self):
-        result = {"role": self.role, "content": self._serialize_content(self.content)}
-        if self.name:
-            result["name"] = self.name
-        return result
+        return {
+            "role": self.role,
+            "content": self._serialize_content(self.content)
+        }
 
     @staticmethod
     def _serialize_content(content: Any) -> Union[str, list]:
@@ -36,7 +34,7 @@ class Message:
 class OllamaProvider:
     def __init__(
         self,
-        model: str = "qwen2.5",
+        model: str = "llama3.2",
         enable_thinking: bool = False,
         thinking_token_budget: int = 2048
     ):
@@ -47,41 +45,45 @@ class OllamaProvider:
 
     async def call(self, messages: List[Union[Message, Dict]]) -> Dict[str, Any]:
         """
-        Accepts a list of Message objects or dicts.
-        Filters out non-prompt stream messages before calling Ollama /generate.
-        Returns raw response from Ollama.
+        Accepts list of Message objects or dictionaries.
+        Filters out internal stream control messages before calling Ollama /chat endpoint.
         """
 
-        # Filter messages to extract only valid prompt input
-        full_prompt = ""
+        # Filter out stream control messages before processing
+        payload_messages = []
         for msg in messages:
-            # Skip internal stream control messages
+            # Skip internal stream control messages like {"type": "stream", ...}
             if isinstance(msg, dict) and "type" in msg:
                 continue
 
-            # Handle Message objects
+            # Convert Message objects to dict
             if isinstance(msg, Message):
-                if msg.role == "user":
-                    full_prompt = self._extract_content(msg.content)
-                    break
-            # Handle raw dictionaries
+                payload_messages.append(msg.to_dict())
             elif isinstance(msg, dict):
-                if msg.get("role") == "user":
-                    full_prompt = self._extract_content(msg.get("content", ""))
-                    break
+                payload_messages.append({
+                    "role": msg.get("role", "user"),
+                    "content": self._extract_content(msg.get("content", ""))
+                })
+            else:
+                # Fallback: wrap raw strings in user message
+                payload_messages.append({
+                    "role": "user",
+                    "content": str(msg)
+                })
 
-        if not full_prompt:
-            full_prompt = "Hello"
+        # Ensure at least one valid message was found
+        if not payload_messages:
+            payload_messages = [{"role": "user", "content": "Hello"}]
 
         payload = {
             "model": self.model,
-            "prompt": full_prompt,
+            "messages": payload_messages,
             "stream": False
         }
 
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{self.base_url}/generate",
+                f"{self.base_url}/chat",
                 json=payload
             ) as response:
                 try:
