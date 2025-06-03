@@ -18,6 +18,7 @@ __all__ = [
 	'AnthropicBedrockProvider',
 	'OpenAIProvider',
 	'GeminiProvider',
+	'OllamaProvider',
 	'AgentOutput',
 	'Detector',
 	'InteractiveElement',
