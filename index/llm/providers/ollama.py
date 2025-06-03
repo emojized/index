@@ -14,9 +14,13 @@ class Message:
 class OllamaProvider:
     def __init__(
         self,
-        model: str = "qwen2.5"
+        model: str = "qwen2.5",
+        enable_thinking: bool = False,
+        thinking_token_budget: int = 2048
     ):
         self.model = model
+        self.enable_thinking = enable_thinking
+        self.thinking_token_budget = thinking_token_budget
         self.base_url = "http://localhost:11434/api"
 
     async def call(self, messages: Union[List[Message], str]) -> Dict[str, Any]:
@@ -30,7 +34,7 @@ class OllamaProvider:
         # Case 1: Raw string prompt
         if isinstance(messages, str):
             full_prompt = messages.strip()
-
+        
         # Case 2: List of Message objects
         elif isinstance(messages, list):
             for msg in messages:
