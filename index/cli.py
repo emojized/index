@@ -595,10 +595,11 @@ def select_model_and_check_key():
     console.print("2. [bold]Gemini 2.5 Flash[/]")
     console.print("3. [bold]Claude 3.7 Sonnet[/]")
     console.print("4. [bold]OpenAI o4-mini[/]")
+    console.print("5. [bold]Ollama qwen2.5[/]")
     
     choice = Prompt.ask(
         "[bold]Select model[/]",
-        choices=["1", "2", "3", "4"],
+        choices=["1", "2", "3", "4","5"],
         default="1"
     )
     
@@ -623,6 +624,10 @@ def select_model_and_check_key():
         provider = "openai"
         model = "o4-mini"
         required_key = "OPENAI_API_KEY"
+     elif choice == "5":
+        provider = "ollama"
+        model = "qwen2.5"
+        required_key = "ollama"
     else:
         raise ValueError(f"Invalid choice: {choice}")
     
