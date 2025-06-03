@@ -27,6 +27,7 @@ from index.llm.llm import BaseLLMProvider
 from index.llm.providers.anthropic import AnthropicProvider
 from index.llm.providers.gemini import GeminiProvider
 from index.llm.providers.openai import OpenAIProvider
+from index.llm.providers.ollama import OllamaProvider
 
 load_dotenv()
 
@@ -553,6 +554,14 @@ def create_llm_provider(provider: str, model: str) -> BaseLLMProvider:
             enable_thinking=True,
             thinking_token_budget=2048
         )
+    elif provider == "ollama":
+        # Ollama model
+        console.print(f"[cyan]Using Ollama model: {model}[/]")
+        return OllamaProvider(
+            model=model,
+            enable_thinking=True,
+            thinking_token_budget=2048
+        )
     else:
         raise ValueError(f"Unsupported provider: {provider}")
 
@@ -624,10 +633,10 @@ def select_model_and_check_key():
         provider = "openai"
         model = "o4-mini"
         required_key = "OPENAI_API_KEY"
-     elif choice == "5":
+    elif choice == "5":
         provider = "ollama"
         model = "qwen2.5"
-        required_key = "ollama"
+        required_key = "OLLAMA_API_KEY"
     else:
         raise ValueError(f"Invalid choice: {choice}")
     

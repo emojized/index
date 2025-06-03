@@ -7,6 +7,7 @@ from index.llm.providers.anthropic import AnthropicProvider
 from index.llm.providers.anthropic_bedrock import AnthropicBedrockProvider
 from index.llm.providers.gemini import GeminiProvider
 from index.llm.providers.openai import OpenAIProvider
+from index.llm.providers.ollama import OllamaProvider
 
 __all__ = [
 	'Agent',
