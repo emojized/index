@@ -18,6 +18,7 @@ Index is a state-of-the-art open-source browser agent that autonomously executes
     - [x] Claude 3.7 Sonnet with extended thinking (reliable and accurate)
     - [x] OpenAI o4-mini (depending on the reasoning effort, provides good balance between speed, cost and accuracy)
     - [x] Gemini 2.5 Flash (really fast, cheap, and good for less complex tasks)
+    - [x] Ollama Qwen2.5  ( still in progress )
 - [x] `pip install lmnr-index` and use it in your project
 - [x] `index run` to run the agent in the interactive CLI
 - [x] Supports structured output via Pydantic schemas for reliable data extraction.
