@@ -1,4 +1,5 @@
 import aiohttp
+import json
 from typing import Any, Dict, List, Optional, Union
 
 from index.llm.llm import BaseLLMProvider, LLMResponse, Message, ThinkingBlock
@@ -57,15 +58,33 @@ class OllamaProvider(BaseLLMProvider):
             
         # Make the API call
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"{self.base_url}/chat", json=payload) as response:
+            async with session.post(f"{self.base_url}/chat", json=payload, params={"stream": "false"}) as response:
                 if response.status != 200:
                     error_text = await response.text()
                     raise Exception(f"Ollama API error: {response.status} - {error_text}")
                 
-                response_json = await response.json()
-                
-        # Extract the response content
-        content = response_json.get("message", {}).get("content", "")
+                # Handle both streaming and non-streaming responses
+                content_type = response.headers.get('Content-Type', '')
+                if 'application/x-ndjson' in content_type:
+                    # Handle streaming response
+                    full_response = ""
+                    response_json = {}
+                    async for line in response.content:
+                        if not line.strip():
+                            continue
+                        try:
+                            chunk = line.decode('utf-8').strip()
+                            chunk_json = json.loads(chunk)
+                            if 'message' in chunk_json and 'content' in chunk_json['message']:
+                                full_response += chunk_json['message']['content']
+                            response_json = chunk_json  # Keep the last chunk for metadata
+                        except Exception as e:
+                            print(f"Error parsing chunk: {e}")
+                    content = full_response
+                else:
+                    # Handle regular JSON response
+                    response_json = await response.json()
+                    content = response_json.get("message", {}).get("content", "")
         
         # Calculate token usage (Ollama doesn't provide this directly)
         # This is an approximation
