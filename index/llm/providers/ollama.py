@@ -8,10 +8,13 @@ class OllamaProvider(BaseLLMProvider):
     def __init__(
         self,
         model: str = "llama3.2",
-        base_url: str = "http://localhost:11434/api"
+        base_url: str = "http://localhost:11434/api",
+        enable_thinking: bool = False,
+        **kwargs
     ):
         super().__init__(model=model)
         self.base_url = base_url
+        self.enable_thinking = enable_thinking
 
     async def call(
         self,
